@@ -1,0 +1,70 @@
+1. CREATE DATABASE s298269;
+
+2. CREATE SCHEMA firma;
+
+3. CREATE ROLE ksiegowosc;
+   GRANT CONNECT ON DATABASE s298269 to ksiegowosc;
+   GRANT USAGE ON SCHEMA firma TO ksiegowosc;
+   GRANT SELECT ON ALL TABLES IN SCHEMA firma TO ksiegowosc;
+   ALTER DEFAULT PRIVILEGES IN SCHEMA firma GRANT SELECT ON TABLES TO ksiegowosc;
+   
+4. 
+a) CREATE TABLE firma.pracownicy(id_pracownika SERIAL, imie VARCHAR(50) NOT NULL, nazwisko VARCHAR(50) NOT NULL, adres VARCHAR(255), telefon VARCHAR(20));
+   CREATE TABLE firma.godziny(id_godziny SERIAL, data DATE NOT NULL, liczba_godzin INT NOT NULL, id_pracownika INT NOT NULL);
+   CREATE TABLE firma.pensja_stanowisko(id_pensji SERIAL, stanowisko VARCHAR(100) NOT NULL, kwota DECIMAL(8,2) NOT NULL);
+   CREATE TABLE firma.premia(id_premii SERIAL, rodzaj VARCHAR(100) NOT NULL, kwota DECIMAL(8,2) NOT NULL);
+   CREATE TABLE firma.wynagrodzenie(id_wynagrodzenia SERIAL, data DATE NOT NULL, id_pracownika INT NOT NULL, id_godziny INT NOT NULL, id_pensji INT NOT NULL);
+   
+b) ALTER TABLE firma.pracownicy ADD PRIMARY KEY (id_pracownika);
+   ALTER TABLE firma.godziny ADD PRIMARY KEY (id_godziny);
+   ALTER TABLE firma.pensja_stanowisko ADD PRIMARY KEY (id_pensji);
+   ALTER TABLE firma.premia ADD PRIMARY KEY (id_premii);
+   
+c) ALTER TABLE firma.godziny ADD FOREIGN KEY (id_pracownika) REFERENCES firma.pracownicy(id_pracownika) ON DELETE CASCADE;
+   ALTER TABLE firma.wynagrodzenie ADD FOREIGN KEY (id_pracownika) REFERENCES firma.pracownicy(id_pracownika) ON DELETE CASCADE;
+   ALTER TABLE firma.wynagrodzenie ADD FOREIGN KEY (id_godziny) REFERENCES firma.godziny(id_godziny) ON DELETE CASCADE;
+   ALTER TABLE firma.wynagrodzenie ADD FOREIGN KEY (id_pensji) REFERENCES firma.pensja_stanowisko(id_pensji) ON DELETE CASCADE;
+   
+d) CREATE INDEX idx_pracownicy_id_pracownika ON firma.pracownicy(id_pracownika);
+   CREATE INDEX idx_godziny_id_godziny ON firma.godziny(id_godziny);
+   CREATE INDEX idx_pensja_stanowisko_id_pensji ON firma.pensja_stanowisko(id_pensji);
+   CREATE INDEX idx_premia_id_premii ON firma.premia(id_premii);
+   CREATE INDEX idx_wynagrodzenia_id_wynagrodzenia ON firma.wynagrodzenie(id_wynagrodzenia);
+   
+e) COMMENT ON TABLE firma.pracownicy IS 'Table contains all hired people';
+   COMMENT ON TABLE firma.godziny IS 'Table contains information on number of hours worked during the day by the worker';
+   COMMENT ON TABLE firma.pensja_stanowisko IS 'Table contains monthly salary per position';
+   COMMENT ON TABLE firma.premia IS 'Table contains informations about prizes';
+   COMMENT ON TABLE firma.wynagrodzenie IS 'Table contains informations about workers salaries';
+   
+5)
+a) ALTER TABLE firma.godziny ADD COLUMN miesiac INT NOT NULL;
+   ALTER TABLE firma.godziny ADD COLUMN nr_tygodnia INT NOT NULL;
+   
+b) ALTER TABLE firma.wynagrodzenie ALTER COLUMN data TYPE VARCHAR;
+
+INSERT INTO firma.pracownicy(imie, nazwisko, adres, telefon) VALUES 
+('Jan', 'Kowalski', 'Mickiewicza 21', '123456789'), 
+('Janusz', 'Kowalski', 'Mickiewicza 37', '987654321'), 
+('Adam', 'Nowak', 'Glubczycka 3', '123454321'), 
+('Maria', 'Podstawka', 'Raciborska 193', '987656789'), 
+('John', 'Doe', 'Testowa 1', '213773211'), 
+('Ala', 'Nowak', 'Polna 3', '666666666'), 
+('Dummy', 'Dummy', 'Dummy 430', '999999999'), 
+('Geogy', 'Phils', 'Lake Lane 321', '444545666'), 
+('Anna', 'Jezierska', 'Lesna 39', '876678876'), 
+('Mariusz', 'Przysiezny', 'Kozielska 98', '111111111');
+   
+DO
+$do$
+DECLARE
+   data DATE := '2020-10-07';
+BEGIN 
+   FOR i IN 1..200 LOOP
+   	data := (SELECT DATE((SELECT TIMESTAMP '2020-10-07' + random() * (TIMESTAMP '2020-12-31 20:00:00' - TIMESTAMP '2020-10-01 10:00:00'))));
+	INSERT INTO firma.godziny (data, liczba_godzin, id_pracownika, miesiac, nr_tygodnia)
+	VALUES (data, (SELECT floor(random() * 12)::INTEGER), (SELECT floor(random() * 9 + 1)::INTEGER), 
+	(SELECT EXTRACT(MONTH FROM data)), (SELECT EXTRACT(WEEK FROM data)));
+   END LOOP;
+END
+$do$;
