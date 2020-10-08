@@ -110,6 +110,9 @@ g) SELECT DISTINCT imie, nazwisko FROM firma.pracownicy, firma.wynagrodzenie, fi
 	firma.pracownicy.id_pracownika=firma.wynagrodzenie.id_pracownika AND firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji AND
 	firma.pensja_stanowisko.kwota BETWEEN 1500 AND 3000;
 	
+h) SELECT imie, nazwisko FROM firma.pracownicy, firma.wynagrodzenie, firma.godziny, firma.premia WHERE firma.pracownicy.id_pracownika=firma.wynagrodzenie.id_pracownika AND firma.wynagrodzenie.id_godziny=firma.godziny.id_godziny AND firma.wynagrodzenie.id_premii=firma.premia.id_premii AND firma.godziny.liczba_godzin-160>0 AND firma.premia.kwota=0;
+
+	
 7.
 a) SELECT DISTINCT imie, nazwisko, firma.pensja_stanowisko.kwota FROM firma.pracownicy, firma.wynagrodzenie, firma.pensja_stanowisko WHERE
 	firma.wynagrodzenie.id_pracownika=firma.pracownicy.id_pracownika AND firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji 
@@ -127,6 +130,25 @@ c) SELECT stanowisko, count(stanowisko) FROM firma.pensja_stanowisko, firma.wyna
 d) SELECT MIN(firma.pensja_stanowisko.kwota), MAX(firma.pensja_stanowisko.kwota), AVG(firma.pensja_stanowisko.kwota) FROM 
 	firma.pensja_stanowisko WHERE firma.pensja_stanowisko.stanowisko LIKE '%kierownik%';
 	
+e) SELECT SUM(sumy) AS suma_wszystkich_wynagrodzen FROM (SELECT firma.pensja_stanowisko.kwota+premia.kwota*COUNT(premia.rodzaj) AS sumy FROM firma.pracownicy
+ INNER JOIN firma.wynagrodzenie ON firma.wynagrodzenie.id_pracownika=firma.pracownicy.id_pracownika
+ INNER JOIN firma.pensja_stanowisko ON firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji
+ INNER JOIN firma.premia ON firma.wynagrodzenie.id_premii=firma.premia.id_premii
+ GROUP BY firma.premia.rodzaj, firma.premia.kwota, firma.pensja_stanowisko.kwota) as suma;
+
+f) SELECT stanowisko, SUM(sumy) FROM (SELECT stanowisko, firma.pensja_stanowisko.kwota + firma.premia.kwota*COUNT(premia.rodzaj) AS sumy FROM firma.pracownicy
+	INNER JOIN firma.wynagrodzenie ON firma.wynagrodzenie.id_pracownika=firma.pracownicy.id_pracownika
+	INNER JOIN firma.pensja_stanowisko ON firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji
+	INNER JOIN firma.premia ON firma.wynagrodzenie.id_premii=firma.premia.id_premii
+	GROUP BY stanowisko, firma.pensja_stanowisko.kwota, firma.premia.kwota) AS suma GROUP BY stanowisko;
+	
+g) SELECT stanowisko, COUNT(premia.id_premii) AS liczba_premii FROM firma.pensja_stanowisko, firma.wynagrodzenie, firma.premia
+	WHERE firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji AND firma.wynagrodzenie.id_premii=firma.premia.id_premii GROUP BY stanowisko;
+	
+h) DELETE FROM firma.pracownicy WHERE id_pracownika IN 
+	(SELECT firma.pracownicy.id_pracownika FROM firma.pracownicy, firma.wynagrodzenie, firma.pensja_stanowisko WHERE
+	firma.wynagrodzenie.id_pracownika=firma.pracownicy.id_pracownika AND firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji AND 
+	firma.pensja_stanowisko.kwota < 1200);		
 8.
 a) UPDATE firma.pracownicy SET telefon = CONCAT('(+48) ', TELEFON);
 
