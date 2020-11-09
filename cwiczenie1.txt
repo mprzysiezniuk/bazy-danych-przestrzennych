@@ -160,3 +160,13 @@ c) SELECT id_pracownika, UPPER(imie), UPPER(nazwisko), UPPER(adres), telefon FRO
 d) SELECT MD5(imie||nazwisko||adres||telefon||firma.pensja_stanowisko.kwota) FROM firma.pracownicy, firma.pensja_stanowisko, firma.wynagrodzenie WHERE
 	firma.wynagrodzenie.id_pracownika=firma.pracownicy.id_pracownika AND firma.wynagrodzenie.id_pensji=firma.pensja_stanowisko.id_pensji 
 	GROUP BY firma.pracownicy.id_pracownika, firma.pensja_stanowisko.kwota;
+	
+9. 
+SELECT 'Pracownik ' || imie || ' ' || nazwisko || ', w dniu '|| EXTRACT(DAY from godziny.data)||'.'
+||EXTRACT(MONTH FROM godziny.data)||'.'||EXTRACT(YEAR FROM godziny.data)||' otrzymał pensję całkowitą na kwotę ' 
+||godziny.liczba_godzin*pensja_stanowisko.kwota+firma.premia.kwota|| ' zł, gdzie wynagrodzenie zasadnicze wynosiło: '||160*pensja_stanowisko.kwota ||' zł, premia: '
+||firma.premia.kwota||' zł, nadgodziny: '||(liczba_godzin-160)*pensja_stanowisko.kwota||' zł. '	
+FROM firma.pracownicy JOIN firma.wynagrodzenie ON wynagrodzenie.id_pracownika=pracownicy.id_pracownika  
+JOIN firma.pensja_stanowisko ON wynagrodzenie.id_pensji=pensja_stanowisko.id_pensji 
+JOIN firma.godziny ON godziny.id_pracownika=wynagrodzenie.id_pracownika 
+FULL JOIN firma.premia ON premia.id_premii=wynagrodzenie.id_premii WHERE pracownicy.id_pracownika is not null;
