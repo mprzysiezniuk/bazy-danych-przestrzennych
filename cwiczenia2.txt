@@ -1,3 +1,37 @@
+6)
+INSERT INTO sklep.producenci(nazwa_producenta, mail, telefon) VALUES
+('adidas', 'adidas@adidas.com', '123456789'),
+('nike', 'nike@nike.com', '987654321'),
+('sony', 'sony@sony.com', '111111111');
+
+INSERT INTO sklep.produkty(nazwa_produktu, cena, id_producenta) VALUES
+('predators cleats', 600, 1),
+('messi cleats', 999, 1),
+('nike tiempo', 300, 2),
+('nike magista', 400, 2),
+('playstation 5', 2000, 3),
+('XPERIA 5', 3000, 3);
+
+INSERT INTO sklep.zamowienia(id_produktu, data, ilosc) VALUES
+(1, '11-23-2020', 1),
+(2, '11-20-2020', 2),
+(3, '11-19-2020, 2)
+(4, '11-21-2020, 3)
+(5, '11-22-2020, 1)
+(6, '11-18-2020, 1);
+
+7)
+Kopia zapasowa stworzona przy pomocy pgAdmin4
+
+8) 
+DROP DATABASE s298269;
+
+9)
+Opcja restore w pgAdmin4
+
+10)
+Nazwa zmieniona przy pomocy pgAdmin4 w properties.
+
 11)
 
 a)
